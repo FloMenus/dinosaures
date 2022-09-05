@@ -2,6 +2,8 @@ const express = require("express");
 const app = express();
 const { Dinosaurs } = require("../models/index");
 
+const { checkDinosaurExists, checkDinosaurAlreadyExists } = require("../middlewares/middleware");
+
 // GET all dinosaurs
 app.get("/", async (req, res) => {
   try {
@@ -23,20 +25,12 @@ app.get("/", async (req, res) => {
 });
 
 // GET one dinosaur
-app.get("/:id", async (req, res) => {
+app.get("/:id", checkDinosaurExists, async (req, res) => {
   try {
     const dinosaur = await Dinosaurs.findOne({
       where: {
         id: req.params.id,
       },
-      attributes: [
-        "name",
-        "scientificName",
-        "apparitionYear",
-        "disappearanceYear",
-        "description",
-        "color",
-      ],
     });
     res.json(dinosaur);
   } catch (error) {
@@ -46,7 +40,7 @@ app.get("/:id", async (req, res) => {
 });
 
 // Add a new dinosaur
-app.post("/", async (req, res) => {
+app.post("/", checkDinosaurAlreadyExists, async (req, res) => {
   try {
     const dinosaur = await Dinosaurs.create(req.body);
     res.json(dinosaur);
@@ -56,7 +50,7 @@ app.post("/", async (req, res) => {
 });
 
 // Update a dinosaur
-app.put("/:id", async (req, res) => {
+app.put("/:id", checkDinosaurExists, async (req, res) => {
   try {
     const dinosaur = await Dinosaurs.update(req.body, {
       where: {
@@ -70,7 +64,7 @@ app.put("/:id", async (req, res) => {
 });
 
 // Delete a dinosaur
-app.delete("/:id", async (req, res) => {
+app.delete("/:id", checkDinosaurExists, async (req, res) => {
   try {
     const dinosaur = await Dinosaurs.destroy({
       where: {
